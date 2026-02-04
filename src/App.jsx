@@ -7,7 +7,7 @@ import './App.css'
 function Model({ scrollProgress }) {
   const group = useRef()
   const actionRef = useRef()
-  const { scene, animations } = useGLTF('/models/scene.gltf')
+  const { scene, animations } = useGLTF('/models/scene-draco.gltf', 'https://www.gstatic.com/draco/versioned/decoders/1.5.7/')
   const { mixer, actions } = useAnimations(animations, group)
 
   useEffect(() => {
