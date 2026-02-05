@@ -9,7 +9,7 @@ import {
   SiGit, SiPython, SiTypescript, SiMongodb, SiTailwindcss,
   SiGithub, SiLinkedin
 } from 'react-icons/si'
-import { HiOutlineMail, HiBriefcase, HiAcademicCap } from 'react-icons/hi'
+import { HiOutlineMail, HiBriefcase, HiAcademicCap, HiHome, HiUser, HiCode, HiMail } from 'react-icons/hi'
 import './App.css'
 
 extend({ MeshLineGeometry, MeshLineMaterial })
@@ -738,6 +738,7 @@ function App() {
   const heroRef = useRef()
   const aboutRef = useRef()
   const [aboutVisible, setAboutVisible] = useState(false)
+  const [radialOpen, setRadialOpen] = useState(false)
   const [line1Done, setLine1Done] = useState(false)
   const [line2Done, setLine2Done] = useState(false)
   const [line3Done, setLine3Done] = useState(false)
@@ -791,6 +792,18 @@ function App() {
           colors={[1, 2, 3, 1, 2, 3, 1, 4]}
         />
       </header>
+      <div className="radial-menu">
+        <div className={`radial-backdrop ${radialOpen ? 'visible' : ''}`} onClick={() => setRadialOpen(false)} />
+        <button className={`radial-toggle ${radialOpen ? 'active' : ''}`} onClick={() => setRadialOpen(!radialOpen)}>
+          <span /><span /><span />
+        </button>
+        <div className={`radial-items ${radialOpen ? 'open' : ''}`}>
+          <a href="#" className="radial-item" onClick={() => setRadialOpen(false)}><HiHome /><span className="radial-label">Inicio</span></a>
+          <a href="#sobre-mi" className="radial-item" onClick={() => setRadialOpen(false)}><HiUser /><span className="radial-label">Sobre mí</span></a>
+          <a href="#proyectos" className="radial-item" onClick={() => setRadialOpen(false)}><HiCode /><span className="radial-label">Proyectos</span></a>
+          <a href="#contacto" className="radial-item" onClick={() => setRadialOpen(false)}><HiMail /><span className="radial-label">Contacto</span></a>
+        </div>
+      </div>
       <div className="hero-wrapper" ref={heroRef}>
         <section className="hero">
           <div className="hero-text">
