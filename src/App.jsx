@@ -3,13 +3,14 @@ import { useGLTF, useAnimations, useTexture, OrbitControls, Environment, Lightfo
 import { Physics, RigidBody, BallCollider, CuboidCollider, useRopeJoint, useSphericalJoint } from '@react-three/rapier'
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline'
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import emailjs from '@emailjs/browser'
 import * as THREE from 'three'
 import {
   SiReact, SiJavascript, SiNodedotjs, SiHtml5, SiCss3,
   SiGit, SiPython, SiTypescript, SiMongodb, SiTailwindcss,
-  SiGithub, SiLinkedin
+  SiGithub, SiLinkedin, SiNextdotjs, SiExpo
 } from 'react-icons/si'
-import { HiOutlineMail, HiBriefcase, HiAcademicCap, HiHome, HiUser, HiCode, HiMail } from 'react-icons/hi'
+import { HiOutlineMail, HiBriefcase, HiAcademicCap, HiHome, HiUser, HiCode, HiMail, HiX, HiExternalLink, HiCheckCircle } from 'react-icons/hi'
 import './App.css'
 
 extend({ MeshLineGeometry, MeshLineMaterial })
@@ -538,6 +539,134 @@ function Lanyard() {
   )
 }
 
+function ProjectModal({ project, onClose }) {
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') onClose() }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKey)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKey)
+    }
+  }, [onClose])
+
+  if (!project) return null
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}><HiX /></button>
+        <div className="modal-image" style={{ backgroundImage: `url(${project.image})` }} />
+        <div className="modal-body">
+          <h3 className="modal-title">{project.title}</h3>
+          <div className="modal-techs">
+            {project.techs.map((tech, j) => (
+              <span key={j} className="modal-tech">
+                {tech.icon}
+                {tech.name}
+              </span>
+            ))}
+          </div>
+          <p className="modal-description">{project.description}</p>
+          {project.link && project.link !== '#' && (
+            <a href={project.link} target="_blank" rel="noopener noreferrer" className="modal-link">
+              <HiExternalLink /> Ver proyecto
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ChromaCard({ project, onClick }) {
+  const cardRef = useRef(null)
+
+  const handleMouseMove = (e) => {
+    const card = cardRef.current
+    if (!card) return
+    const rect = card.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    card.style.setProperty('--mouse-x', `${x}px`)
+    card.style.setProperty('--mouse-y', `${y}px`)
+  }
+
+  return (
+    <div
+      ref={cardRef}
+      className="project-card chroma-card"
+      onMouseMove={handleMouseMove}
+      onClick={onClick}
+    >
+      <div className="chroma-glow" />
+      <div className="chroma-border" />
+      <div className="chroma-content">
+        <div className="project-card-img-wrapper">
+          <div className="project-card-img" style={{ backgroundImage: `url(${project.image})` }} />
+          <div className="project-card-overlay" />
+        </div>
+        <div className="project-card-info">
+          <h3 className="project-card-title">{project.title}</h3>
+          <div className="project-card-techs">
+            {project.techs.map((tech, j) => (
+              <span key={j} className="project-card-tech">
+                {tech.icon}
+                {tech.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const PROJECTS_DATA = [
+  {
+    title: 'Sumaq Mayu - Casa Hotel',
+    image: '/projects/sumaqmayu.jpeg',
+    description: 'Desarrollo de la página web para Sumaq Mayu Casa Hotel. Incluye sistema de reservas, galería de habitaciones, información de servicios y diseño responsivo optimizado para atraer turistas a la región.',
+    techs: [
+      { icon: <SiReact />, name: 'React' },
+      { icon: <SiJavascript />, name: 'JavaScript' },
+      { icon: <SiCss3 />, name: 'CSS3' },
+    ],
+    link: 'https://pagina-web-sumaqmayu.vercel.app/',
+  },
+  {
+    title: 'Sistema de Convocatorias - Poder Judicial',
+    image: '/projects/convocatoria-pj.png',
+    description: 'Sistema web para gestionar convocatorias de personal del Poder Judicial. Permite publicar convocatorias, recibir postulaciones, evaluar candidatos y generar resultados. Panel administrativo con autenticación y roles de usuario.',
+    techs: [
+      { icon: <SiNextdotjs />, name: 'Next.js' },
+      { icon: <SiReact />, name: 'React' },
+      { icon: <SiTypescript />, name: 'TypeScript' },
+    ],
+    link: 'https://sistema-convocatoria-pj.vercel.app/login',
+  },
+  {
+    title: 'App Delivery de Agua - Iquitos',
+    image: '/projects/agua-iquitos.jpeg',
+    description: 'Aplicación móvil para una empresa de reparto de agua en la ciudad de Iquitos. Los clientes pueden realizar pedidos, hacer seguimiento en tiempo real de su delivery y gestionar sus direcciones de entrega. Desarrollada con Expo Go y React Native.',
+    techs: [
+      { icon: <SiExpo />, name: 'Expo Go' },
+      { icon: <SiReact />, name: 'React Native' },
+      { icon: <SiJavascript />, name: 'JavaScript' },
+    ],
+    link: '#',
+  },
+  {
+    title: 'Automatización de Reportes - CSJL',
+    image: '/projects/reportes-csjl.jpeg',
+    description: 'Herramienta de automatización de reportes judiciales para la Corte Superior de Justicia de Loreto. Genera reportes automáticos a partir de datos del sistema judicial, reduciendo significativamente el tiempo de elaboración manual de documentos.',
+    techs: [
+      { icon: <SiPython />, name: 'Python' },
+    ],
+    link: '#',
+  },
+]
+
 const TIMELINE_DATA = [
   {
     year: '2024',
@@ -725,6 +854,125 @@ function GooeyNav({ items, animationTime = 600, particleCount = 15, particleDist
   )
 }
 
+function ProfileCard({ avatarUrl, name, title, handle, status, contactText, onContactClick, showUserInfo = true }) {
+  const cardRef = useRef(null)
+  const [isActive, setIsActive] = useState(false)
+
+  const handlePointerMove = (e) => {
+    if (!cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+
+    const pointerFromLeft = x / rect.width
+    const pointerFromTop = y / rect.height
+    const pointerFromCenter = Math.sqrt(
+      Math.pow((x - centerX) / centerX, 2) +
+      Math.pow((y - centerY) / centerY, 2)
+    )
+
+    const rotateX = ((x - centerX) / centerX) * 15
+    const rotateY = ((y - centerY) / centerY) * -15
+
+    const bgX = 50 + ((x - centerX) / centerX) * 20
+    const bgY = 50 + ((y - centerY) / centerY) * 20
+
+    cardRef.current.style.setProperty('--pointer-x', `${(x / rect.width) * 100}%`)
+    cardRef.current.style.setProperty('--pointer-y', `${(y / rect.height) * 100}%`)
+    cardRef.current.style.setProperty('--pointer-from-center', pointerFromCenter.toFixed(2))
+    cardRef.current.style.setProperty('--pointer-from-left', pointerFromLeft.toFixed(2))
+    cardRef.current.style.setProperty('--pointer-from-top', pointerFromTop.toFixed(2))
+    cardRef.current.style.setProperty('--rotate-x', `${rotateX}deg`)
+    cardRef.current.style.setProperty('--rotate-y', `${rotateY}deg`)
+    cardRef.current.style.setProperty('--background-x', `${bgX}%`)
+    cardRef.current.style.setProperty('--background-y', `${bgY}%`)
+  }
+
+  const handlePointerEnter = () => setIsActive(true)
+  const handlePointerLeave = () => {
+    setIsActive(false)
+    if (cardRef.current) {
+      cardRef.current.style.setProperty('--rotate-x', '0deg')
+      cardRef.current.style.setProperty('--rotate-y', '0deg')
+    }
+  }
+
+  return (
+    <div
+      ref={cardRef}
+      className={`pc-card-wrapper ${isActive ? 'active' : ''}`}
+      onPointerMove={handlePointerMove}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+    >
+      <div className="pc-behind" />
+      <div className="pc-card-shell">
+        <div className={`pc-card ${isActive ? 'active' : ''}`}>
+          <div className="pc-inside" />
+          <div className="pc-shine" />
+          <div className="pc-glare" />
+          <div className="pc-content pc-avatar-content">
+            <img src={avatarUrl} alt={name} className="avatar" />
+          </div>
+          <div className="pc-content">
+            <div className="pc-details">
+              <h3>{name}</h3>
+              <p>{title}</p>
+            </div>
+          </div>
+          {showUserInfo && (
+            <div className="pc-user-info">
+              <div className="pc-user-details">
+                <div className="pc-mini-avatar">
+                  <img src={avatarUrl} alt={name} />
+                </div>
+                <div className="pc-user-text">
+                  <span className="pc-handle">{handle}</span>
+                  <span className="pc-status">{status}</span>
+                </div>
+              </div>
+              <button className="pc-contact-btn" onClick={onContactClick}>
+                {contactText}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SuccessModal({ onClose }) {
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') onClose() }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', handleKey)
+    const autoClose = setTimeout(onClose, 5000)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKey)
+      clearTimeout(autoClose)
+    }
+  }, [onClose])
+
+  return (
+    <div className="success-modal-backdrop" onClick={onClose}>
+      <div className="success-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="success-modal-icon">
+          <HiCheckCircle />
+        </div>
+        <h3 className="success-modal-title">¡Mensaje enviado!</h3>
+        <p className="success-modal-text">
+          Paulo Meza se pondrá en contacto contigo en breve.
+        </p>
+        <button className="success-modal-btn" onClick={onClose}>Entendido</button>
+      </div>
+    </div>
+  )
+}
+
 const NAV_ITEMS = [
   { label: 'Inicio', href: '#' },
   { label: 'Sobre mí', href: '#sobre-mi' },
@@ -739,9 +987,13 @@ function App() {
   const aboutRef = useRef()
   const [aboutVisible, setAboutVisible] = useState(false)
   const [radialOpen, setRadialOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState(null)
   const [line1Done, setLine1Done] = useState(false)
   const [line2Done, setLine2Done] = useState(false)
   const [line3Done, setLine3Done] = useState(false)
+  const formRef = useRef()
+  const [formStatus, setFormStatus] = useState('idle') // idle | sending | error
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const onLine1Done = useCallback(() => setLine1Done(true), [])
   const onLine2Done = useCallback(() => setLine2Done(true), [])
   const onLine3Done = useCallback(() => setLine3Done(true), [])
@@ -771,7 +1023,7 @@ function App() {
           observer.disconnect()
         }
       },
-      { threshold: 0.15 }
+      { threshold: 0.01 }
     )
     observer.observe(aboutRef.current)
     return () => observer.disconnect()
@@ -862,12 +1114,104 @@ function App() {
             {aboutVisible && <Lanyard />}
           </div>
         </div>
+        <div className="quote-block">
+          <div className="quote-line-left" />
+          <blockquote className="quote-text">
+            Transformo ideas en experiencias digitales
+          </blockquote>
+          <span className="quote-author">— Paulo Meza</span>
+          <div className="quote-line-right" />
+        </div>
       </section>
-      <section id="proyectos" className="section">
-        <h2>Proyectos</h2>
+      <section id="proyectos" className="projects-section">
+        <div className="projects-header">
+          <h2 className="projects-title">Proyectos</h2>
+          <div className="projects-title-line" />
+        </div>
+        <div className="projects-grid chroma-grid">
+          {PROJECTS_DATA.map((project, i) => (
+            <ChromaCard key={i} project={project} onClick={() => setSelectedProject(project)} />
+          ))}
+        </div>
       </section>
-      <section id="contacto" className="section">
-        <h2>Contacto</h2>
+      {selectedProject && (
+        <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+      )}
+      {showSuccessModal && (
+        <SuccessModal onClose={() => setShowSuccessModal(false)} />
+      )}
+      <section id="contacto" className="contact-section">
+        <div className="contact-header">
+          <h2 className="contact-title">Contacto</h2>
+          <div className="contact-title-line" />
+        </div>
+        <div className="contact-content">
+          <div className="contact-form-wrapper">
+            <h3 className="contact-form-title">Envíame un mensaje</h3>
+            <p className="contact-form-subtitle">¿Tienes un proyecto en mente? ¡Hablemos!</p>
+            <form
+              ref={formRef}
+              className="contact-form"
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (formStatus === 'sending') return
+                setFormStatus('sending')
+                emailjs.sendForm(
+                  import.meta.env.VITE_EMAILJS_SERVICE_ID,
+                  import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+                  formRef.current,
+                  import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+                )
+                  .then(() => {
+                    setFormStatus('idle')
+                    formRef.current.reset()
+                    setShowSuccessModal(true)
+                  })
+                  .catch(() => {
+                    setFormStatus('error')
+                    setTimeout(() => setFormStatus('idle'), 4000)
+                  })
+              }}
+            >
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="name">Nombre</label>
+                  <input type="text" id="name" name="from_name" placeholder="Tu nombre" required />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="email">Email</label>
+                  <input type="email" id="email" name="reply_to" placeholder="tu@email.com" required />
+                </div>
+              </div>
+              <div className="form-group">
+                <label htmlFor="subject">Asunto</label>
+                <input type="text" id="subject" name="subject" placeholder="¿De qué quieres hablar?" required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="message">Mensaje</label>
+                <textarea id="message" name="message" rows="5" placeholder="Cuéntame sobre tu proyecto..." required />
+              </div>
+              <button type="submit" className="contact-submit" disabled={formStatus === 'sending'}>
+                <HiMail />
+                {formStatus === 'sending' ? 'Enviando...' : formStatus === 'error' ? 'Error al enviar' : 'Enviar mensaje'}
+              </button>
+              {formStatus === 'error' && (
+                <p className="form-feedback form-feedback--error">Hubo un error. Intenta de nuevo o escríbeme directo por email.</p>
+              )}
+            </form>
+          </div>
+          <div className="profile-card-section">
+            <ProfileCard
+              avatarUrl="/lanyard/yo.jpeg"
+              name="Paulo"
+              title="Full Stack Developer"
+              handle="@devjack"
+              status="Disponible para proyectos"
+              contactText="Contactar"
+              onContactClick={() => document.getElementById('name')?.focus()}
+            />
+          </div>
+        </div>
       </section>
     </div>
   )
